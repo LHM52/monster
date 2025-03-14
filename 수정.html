@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>몬스터 잡기</title>
+  <link rel="stylesheet" href="style/style.css" />
+</head>
+
+<body>
+  <div id="container">
+    <h1>몬스터 잡기 게임을 시작합니다!</h1>
+  </div>
+  <div class="game-container">
+    <div class="game-screen">
+      <div class="sword swing">
+        <img src="imgs/검.png" alt="" />
+      </div>
+    </div>
+    <div class="text-log"></div>
+    <div class="monster">
+      <p>몬스터</p>
+      <div id="monster-hp-bar">
+        <div id="hp"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    let monsterHP = 100; // 최대 체력
+    let currentHp = monsterHP; // 현재 체력
+    const textLog = document.querySelector(".text-log");
+
+    let attackDamage = parseInt(prompt("1회 공격시 데미지는? (양의 정수)"));
+    let attackCount = 0;
+    let sword = document.querySelector(".sword");
+    let monster = document.querySelector(".monster");
+
+    // 충돌 체크 함수
+    function checkCollision(swordRect, monsterRect) {
+      return (
+        swordRect.left < monsterRect.right &&
+        swordRect.right > monsterRect.left &&
+        swordRect.top < monsterRect.bottom &&
+        swordRect.bottom > monsterRect.top
+      );
+    }
+
+    // 공격 입력이 잘못된 경우
+    if (attackDamage <= 0 || isNaN(attackDamage)) {
+      alert("데미지를 잘못 입력하여 게임을 취소합니다.");
+      location.reload(true); // 새로고침하여 게임 재시작
+    } else {
+      let interval = setInterval(() => {
+        let swordRect = sword.getBoundingClientRect();
+        let monsterRect = monster.getBoundingClientRect();
+
+        if (checkCollision(swordRect, monsterRect)) {
+          console.log("충돌 발생!");
+          currentHp -= attackDamage; // 현재 체력 감소
+
+          if (currentHp < 0) {
+            currentHp = 0; // 체력이 0 이하로 내려가지 않도록 설정
+            clearInterval(interval);
+            const h2 = document.createElement("h2");
+            h2.textContent = "게임 클리어!";
+            h2.style.color = "orange";
+            h2.title = "게임을 다시 시작하고 싶으면 새로고침하세요.";
+            textLog.append(h2);
+            sword.classList.remove('swing');
+            monster.classList.add('die');
+            return; // 추가 로그 기록 방지
+          }
+
+          let hpPercent = (currentHp / monsterHP) * 100; // 체력바 비율 계산
+          document.getElementById('hp').style.width = hpPercent + '%';
+
+          attackCount++;
+
+          const p = document.createElement("p");
+          p.textContent = `몬스터를 ${attackCount}회 공격했다!`;
+          textLog.append(p);
+
+          const strong = document.createElement("strong");
+          strong.textContent = `몬스터의 남은 HP는 ${currentHp} 입니다.`; // `monsterHP` 대신 `currentHp` 사용
+          textLog.append(strong);
+        }
+      }, 100); // 100ms마다 체크
+    }
+
+  </script>
+</body>
+
+</html>
